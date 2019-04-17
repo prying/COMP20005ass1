@@ -1,5 +1,5 @@
 /*****************************
- * Flynn Harrison 13/03/2019
+ * Flynn Harrison 13/04/2019
  * Ass1 for comp20005
  * Takes .tsv file to complete 
  * tasks
@@ -99,6 +99,7 @@ double distance_ptp(double _x1, double _y1, double _x2, double _y2)
 
 double distance_o(double _x, double _y)
 {
+    // distance from origin
     return distance_ptp(0, 0, _x, _y);
 }
 
