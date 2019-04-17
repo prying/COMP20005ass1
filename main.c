@@ -35,10 +35,10 @@ typedef struct
 }delivery_t;
 
 // Prototypes 
-/* Prints the first and last elements of delivery_t array */
-void print_first_last(char *stage,delivery_t list[], int list_size);
+/* Prints the first and last elements of delivery_t array*/
+void print_first_last(char *stage,delivery_t list[], int size);
 /* Sums up the masses in a delivery_t array */
-double delivery_t_mass_sum(delivery_t *list, int list_size);
+double delivery_t_mass_sum(delivery_t *list, int size);
 /* distance from point to point */
 double distance_ptp(double _x1, double _y1, double _x2, double _y2);
 /* distance from origin */
@@ -73,23 +73,23 @@ int main(int argc, char **argv)
 
 }
 
-void print_first_last(char *stage, delivery_t *list, int list_size)
+void print_first_last(char *stage, delivery_t *list, int size)
 {
-    printf("%s, total data lines: %3d\n",stage, list_size);
+    printf("%s, total data lines: %3d\n",stage, size);
     // First and last elements of array
     printf("%s, first data line :  x=%4.1lf, y=%4.1lf, kg=%4.1lf\n",
         stage, list[0].x, list[0].y, list[0].mass);
     printf("%s, final data line :  x=%4.1lf, y=%4.1lf, kg=%4.1lf\n",
-        stage, list[list_size-1].x, list[list_size-1].y, list[list_size-1].mass);
+        stage, list[size-1].x, list[size-1].y, list[size-1].mass);
 }
 
-double delivery_t_mass_sum(delivery_t *list, int list_size)
+double delivery_t_mass_sum(delivery_t *list, int size)
 {
     double sum = 0;
     int i;
 
     // Sum up masses from .mass element
-    for (i = 0; i<list_size; i++)
+    for (i = 0; i<size; i++)
     {
         sum += list[i].mass;
     }
