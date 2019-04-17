@@ -64,9 +64,9 @@ int main(int argc, char **argv)
         deliverys[lenght].mass = m_buff;
     }
     
-    print_first_last(STAGE_1, deliverys, lenght-1);
+    print_first_last(STAGE_1, deliverys, lenght);
     printf("%s, total to deliver: %3.2lf Kg\n",
-        STAGE_1, delivery_t_mass_sum(deliverys, lenght-1));
+        STAGE_1, delivery_t_mass_sum(deliverys, lenght));
 
     // Stage 2
 
@@ -80,7 +80,7 @@ void print_first_last(char *stage, delivery_t *list, int list_size)
     printf("%s, first data line :  x=%4.1lf, y=%4.1lf, kg=%4.1lf\n",
         stage, list[0].x, list[0].y, list[0].mass);
     printf("%s, final data line :  x=%4.1lf, y=%4.1lf, kg=%4.1lf\n",
-        stage, list[list_size].x, list[list_size].y, list[list_size].mass);
+        stage, list[list_size-1].x, list[list_size-1].y, list[list_size-1].mass);
 }
 
 double delivery_t_mass_sum(delivery_t *list, int list_size)
