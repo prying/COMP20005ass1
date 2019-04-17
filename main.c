@@ -1,12 +1,19 @@
 /*****************************
  * Flynn Harrison 13/03/2019
- * sort function that sort in
- * assending order 
+ * Ass1 for comp20005
+ * Takes .tsv file to complete 
+ * tasks
  ****************************/
 
 
 #include <stdio.h>
 #include <math.h>
+
+// Errors
+/*Custom Error */
+#define CU_ERROR        -1.0
+/*Not Enough Charge*/
+#define NE_CHARGE       -2.0 
 
 // Settings
 #define MAX_DELIVERYS   999
@@ -30,6 +37,13 @@ typedef struct
 void print_first_last(char *stage,delivery_t list[], int list_size);
 /* Sums up the masses in a delivery_t array */
 double delivery_t_mass_sum(delivery_t *list, int list_size);
+/* distance from point to point */
+double distance_ptp(double _x1, double _y1, double _x2, double _y2);
+/* distance from origin */
+double distance_o(double _x, double _y);
+/* Returns charge used as decimal, returns NE_CHARGE (not enough charge)
+ if fails. mass is not including drone weight*/
+double charge_used(double distance, double mass);
 
 int main(int argc, char **argv)
 {
@@ -47,10 +61,14 @@ int main(int argc, char **argv)
         deliverys[lenght].y = y_buff;
         deliverys[lenght].mass = m_buff;
     }
-
+    
     print_first_last(STAGE_1, deliverys, lenght-1);
     printf("%s, total to deliver: %3.2lf Kg\n",
         STAGE_1, delivery_t_mass_sum(deliverys, lenght-1));
+
+    // Stage 2
+
+
 }
 
 void print_first_last(char *stage, delivery_t *list, int list_size)
@@ -71,4 +89,30 @@ double delivery_t_mass_sum(delivery_t *list, int list_size)
         sum += list[i].mass;
     }
     return sum;
+}
+
+double distance_ptp(double _x1, double _y1, double _x2, double _y2)
+{ 
+    // Pythag
+    return sqrt(pow(_x2-_x1, 2) + pow(_y2-_y1, 2));
+}
+
+double distance_o(double _x, double _y)
+{
+    return distance_ptp(0, 0, _x, _y);
+}
+
+double charge_used(double distance, double mass)
+{
+    double charge = 0.0;
+    charge = 6300/(DRONE_MASS + mass);
+
+    
+    // Test for empty 
+    if (charge == 0)
+    {
+        return NE_CHARGE;
+    } 
+
+    return 0;
 }
