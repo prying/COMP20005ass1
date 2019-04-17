@@ -77,9 +77,9 @@ void print_first_last(char *stage, delivery_t *list, int size)
 {
     printf("%s, total data lines: %3d\n",stage, size);
     // First and last elements of array
-    printf("%s, first data line :  x=%4.1lf, y=%4.1lf, kg=%4.1lf\n",
+    printf("%s, first data line :  x=%6.1lf, y=%6.1lf, kg=%.2lf\n",
         stage, list[0].x, list[0].y, list[0].mass);
-    printf("%s, final data line :  x=%4.1lf, y=%4.1lf, kg=%4.1lf\n",
+    printf("%s, final data line :  x=%6.1lf, y=%6.1lf, kg=%.2lf\n",
         stage, list[size-1].x, list[size-1].y, list[size-1].mass);
 }
 
