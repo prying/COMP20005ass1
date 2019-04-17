@@ -3,8 +3,8 @@
  * Ass1 for comp20005
  * Takes .tsv file to complete 
  * tasks
+ * 
  ****************************/
-
 
 #include <stdio.h>
 #include <math.h>
@@ -19,6 +19,9 @@
 #define MAX_DELIVERYS   999
 #define MAX_PAYLOAD     5.8 // Kg
 #define DRONE_MASS      3.4 // Kg
+
+#define ORIGIN_X        0
+#define ORIGIN_Y        0
 
 #define STAGE_1         "S1"
 #define STAGE_2         "S2"
@@ -84,7 +87,10 @@ void print_first_last(char *stage, delivery_t *list, int list_size)
 double delivery_t_mass_sum(delivery_t *list, int list_size)
 {
     double sum = 0;
-    for (int i = 0; i<list_size; i++)
+    int i;
+
+    // Sum up masses from .mass element
+    for (i = 0; i<list_size; i++)
     {
         sum += list[i].mass;
     }
@@ -100,7 +106,7 @@ double distance_ptp(double _x1, double _y1, double _x2, double _y2)
 double distance_o(double _x, double _y)
 {
     // distance from origin
-    return distance_ptp(0, 0, _x, _y);
+    return distance_ptp(ORIGIN_X, ORIGIN_Y, _x, _y);
 }
 
 double charge_used(double distance, double mass)
