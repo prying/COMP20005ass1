@@ -137,6 +137,7 @@ int main(int argc, char **argv)
 
     print_non_seq_order(STAGE_4, items, num_items, x_h, y_h);
 
+    printf("\nTa daa!\n");
     return 0;
 }
 
@@ -360,4 +361,4 @@ double centroid_y(item_t *list,size_t size)
     return (1.0/size)*sum;
 }
 
-// One of the enjoyable assignments ive had
+// One of the most enjoyable assignments ive had
