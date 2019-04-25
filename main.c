@@ -37,6 +37,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <math.h>
 
 // Errors
@@ -66,13 +67,15 @@ typedef struct
     double x,y;
     // Mass Kg
     double mass;
-}delivery_t;
+    // Is delivered
+    bool is_delivered;
+}item_t;
 
 // Prototypes 
-/* Prints the first and last elements of delivery_t array*/
-void print_first_last(char *stage,delivery_t list[], int size);
-/* Sums up the masses in a delivery_t array */
-double delivery_t_mass_sum(delivery_t *list, int size);
+/* Prints the first and last elements of item_t array*/
+void print_first_last(char *stage,item_t list[], int size);
+/* Sums up the masses in a item_t array */
+double item_m_sum(item_t *list, int size);
 /* distance from point to point */
 double distance_ptp(double _x1, double _y1, double _x2, double _y2);
 /* distance from origin */
@@ -83,17 +86,23 @@ double charge_used(double distance, double mass);
 /* Stage ouput */
 void stage_output(char *s, int i, double distance, 
     double bat_out, double bat_ret);
+/* gets new battery */
+void bat_new(char *s, double *charge);
+/* checks if charge can be drawn out of battery */
+int bat_check(double charge, double bat_out, double bat_ret);
 /* battery check, returns 1 if change battery */
-int battery_check(char *s, double *charge, double bat_out, double bat_ret);
+int bat_check_change(char *s, double *charge, double bat_out, double bat_ret);
 /* vailidate package */
 void package_check(double mass, double max_mass);
+/* Gets item_t stats from element i of the list */
+void item_stats(item_t *list, int i, double *dis, double *b_out, double *b_ret);
 /* Prints out Stage/fligh stats */
 void print_stage_stats(char *s, int num_bat, double dis, double velocity);
 
 int main(int argc, char **argv)
 {
     // Stage 1, get input
-    delivery_t deliverys[MAX_DELIVERYS];
+    item_t load[MAX_DELIVERYS];
     int lenght = 0;
     double x_buff, y_buff, m_buff;
     // Eat first line
@@ -102,14 +111,16 @@ int main(int argc, char **argv)
     for(;(scanf("%lf %lf %lf", &x_buff, &y_buff, &m_buff) == 3) 
             && lenght<MAX_DELIVERYS; lenght++)
     {
-        deliverys[lenght].x = x_buff;
-        deliverys[lenght].y = y_buff;
-        deliverys[lenght].mass = m_buff;
+        load[lenght].x = x_buff;
+        load[lenght].y = y_buff;
+        load[lenght].mass = m_buff;
+        load[lenght].is_delivered = false;
     }
     
-    print_first_last(STAGE_1, deliverys, lenght);
-    printf("%s, total to deliver: %3.2lf Kg\n",
-        STAGE_1, delivery_t_mass_sum(deliverys, lenght));
+    print_first_last(STAGE_1, load, lenght);
+    printf("%s, total to deliver: %3.2lf kg\n",
+        STAGE_1, item_m_sum(load, lenght));
+    puts("");
 
     // Stage 2
     // Loop through all the packages
@@ -124,22 +135,66 @@ int main(int argc, char **argv)
         double bat_out = 0.0;
         double bat_ret = 0.0;
 
-        distance = distance_o(deliverys[i].x, deliverys[i].y);
-        bat_out = charge_used(distance, deliverys[i].mass);
-        bat_ret = charge_used(distance, 0);
+        item_stats(load, i, &distance, &bat_out, &bat_ret);
         
-        // Check remaining charge
-        package_check(deliverys[i].mass, MAX_PAYLOAD);
-        num_bat += battery_check(STAGE_2, &charge, bat_out, bat_ret);
+        // Check remaining charge & stage stats
+        num_bat += bat_check_change(STAGE_2, &charge, bat_out, bat_ret);
         total_d += 2*distance;
 
         // Print S2
         stage_output(STAGE_2, i, distance, bat_out, bat_ret);
     }
     print_stage_stats(STAGE_2, num_bat, total_d, DRONE_SPEED);
+
+    puts("");
+    // Stage 3
+    charge = FULL_CHARGE;
+    total_d = 0.0;
+    num_bat = 1;
+    for (i = 0; i < lenght; i++)
+    {
+        int j;
+        bool new_bat_flag = false;
+        for (j=i; j<lenght; j++)
+        {
+            if (load[j].is_delivered == false)
+            {
+                double distance = 0.0;
+                double bat_out = 0.0;
+                double bat_ret = 0.0;
+
+                item_stats(load, j, &distance, &bat_out, &bat_ret);      
+
+                // Check if the drone can also take load
+                if (bat_check(charge, bat_out, bat_ret))
+                {
+                    load[j].is_delivered = true;
+                    total_d += 2*distance;
+                    // just used to increment charge 
+                    bat_check_change(STAGE_3, &charge, bat_out, bat_ret); 
+                    stage_output(STAGE_3, j, distance, bat_out, bat_ret);
+                    new_bat_flag = false;
+                }
+                else
+                {
+                    new_bat_flag = true;
+                }
+                
+            }
+        }
+        // Get new battery
+        if (new_bat_flag)
+        {
+            bat_new(STAGE_3, &charge);
+            num_bat ++;            
+        }
+    }
+    print_stage_stats(STAGE_3, num_bat, total_d, DRONE_SPEED);
+    
+    return 1;
 }
 
-void print_first_last(char *stage, delivery_t *list, int size)
+void print_first_last(char *stage, item_t *list, int size)
 {
     printf("%s, total data lines: %3d\n",stage, size);
     // First and last elements of array
@@ -149,7 +204,7 @@ void print_first_last(char *stage, delivery_t *list, int size)
         stage, list[size-1].x, list[size-1].y, list[size-1].mass);
 }
 
-double delivery_t_mass_sum(delivery_t *list, int size)
+double item_m_sum(item_t *list, int size)
 {
     double sum = 0;
     // Sum up masses from .mass element
@@ -188,7 +243,7 @@ void stage_output(char *s, int i, double distance,
     printf("battery out=%4.1lf%%, battery ret=%4.1lf%%\n", bat_out, bat_ret);
 }
 
-int battery_check(char *s, double *charge, double bat_out, double bat_ret)
+int bat_check_change(char *s, double *charge, double bat_out, double bat_ret)
 {
     // make sure its a valid package
     if (bat_out + bat_ret > FULL_CHARGE)
@@ -201,8 +256,8 @@ int battery_check(char *s, double *charge, double bat_out, double bat_ret)
     if (*charge <= 0)
     {
         // need new battery
-        printf("%s, change the battery\n", s);
-        *charge = FULL_CHARGE;
+        bat_new(s, charge);
+        //update with current charge
         *charge -= bat_out + bat_ret;
         return 1;
     }
@@ -221,8 +276,33 @@ void package_check(double mass, double max_mass)
 
 void print_stage_stats(char *s, int num_bat, double dis, double velocity)
 {
-    int time = dis/velocity;
+    int time = round(dis/velocity);
     printf("%s, total batteries required:%4d\n",s, num_bat);
     printf("%s, total flight distance=%.1lf meters, ", s, dis);
-    printf("total flight time= %d\n", time);
+    printf("total flight time=%4d seconds\n", time);
+}
+
+void bat_new(char *s, double *charge)
+{
+    printf("%s, change the battery\n", s);
+    *charge = FULL_CHARGE;
+}
+
+int bat_check(double charge, double bat_out, double bat_ret)
+{
+    // does the battery have enough charge to complete
+    // the opertation
+    if (charge - (bat_out + bat_ret) < 0)
+    {
+        return 0;
+    }
+    return 1;
+}
+
+void item_stats(item_t *list, int i, double *dis, double *b_out, double *b_ret)
+{
+    *dis = distance_o(list[i].x, list[i].y);
+    *b_out = charge_used(*dis, list[i].mass);
+    *b_ret = charge_used(*dis, 0);
+    package_check(list[i].mass, MAX_PAYLOAD);
 }
